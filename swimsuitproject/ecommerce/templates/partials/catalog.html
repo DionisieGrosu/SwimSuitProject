@@ -1,0 +1,44 @@
+{% extends '../base/base.html' %} {% load static %} {% block content %}
+
+<section class="main-catalog" style="position: relative;">
+    <div class="block-arrow-line">
+        <span class="block-arrow-line__left"></span><span class="block-arrow-line__center"></span><span class="block-arrow-line__right"></span>
+    </div>
+    <div class="main-catalog__container _container">
+        <div class="main-catalog__title">Каталог</div>
+        <div class="main-catalog__items main-catalog-items">
+            {% for product in products %}
+            <div class="main-catalog-item" data-link="{% url 'ecommerce:productdetails' product.id %}" data-id="{{ product.id }}">
+                <div class="main-catalog-item__image-wrap">
+                    <div class="main-catalog-item__new-bage catalog-bage"></div>
+                    <div class="main-catalog-item__sale-bage catalog-bage"></div>
+                    <picture>
+                        <source srcset="{% for image in product.images.all|slice:':1' %} {{ image.images.url }} {% endfor %}" type="image/webp"><img class="main-catalog-item__visible-image" src="{% for image in product.images.all|slice:':1' %} {{ image.images.url }} {% endfor %}"></picture>
+                    <picture>
+                        <source srcset="{% for image in product.images.all|slice:'1:2' %} {{ image.images.url }} {% endfor %}" type="image/webp"><img class="main-catalog-item__hidden-image" src="{% for image in product.images.all|slice:'1:2' %} {{ image.images.url }} {% endfor %}"></picture>
+                </div>
+
+                <div class="main-catalog-item__content">
+                    <div class="main-catalog-item__title">{{ product.name }}</div>
+                    <div class="main-catalog-item__subtitle">{{ product.preview }}</div>
+                    <div class="main-catalog-item__price-wrap">
+                        <div class="main-catalog-item__price">{% if product.discount != 0.0 %} {{product.discount}} {% else %} {{product.price}} {% endif %}</div>
+                        {%if product.discount != 0.0 %}
+                        <div class="main-catalog-item__discount">{% if product.discount != 0.0 %} {{product.price}} {% else %} {{product.discount}} {% endif %}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+
+
+        </div>
+
+    </div>
+    <div class="block-arrow-line">
+        <span class="block-arrow-line__left"></span><span class="block-arrow-line__center"></span><span class="block-arrow-line__right"></span>
+    </div>
+</section>
+
+{% endblock %}
