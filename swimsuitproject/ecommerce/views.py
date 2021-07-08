@@ -1,7 +1,7 @@
 
 from django.shortcuts import render
 from .models import News, Product, ProductImage, ProductSize, Delivery
-from django.http import JsonResponse, Http404, HttpResponseBadRequest
+from django.http import JsonResponse, Http404, HttpResponseBadRequest, HttpResponse
 from django.core import serializers
 from django.urls import reverse
 import json
@@ -14,30 +14,31 @@ def index(request):
     news = News.objects.all()[:3]
     if(news):
         context = {
-            'news' : news
+            'news': news
         }
     else:
         context = {
-            'news' : []
+            'news': []
         }
-      
+
     return render(request, 'partials/index.html', context)
 
 
 def catalog(request):
     products = Product.objects.all()
     context = {
-        'products' : products
+        'products': products
     }
     return render(request, 'partials/catalog.html', context)
 
 
 def catalogDetail(request, id):
-    
+
     if request.is_ajax != False:
-        product = Product.objects.get(pk = id)
+        product = Product.objects.get(pk=id)
         deliceryOptions = Delivery.objects.all()
-        relatedProducts = random.sample(list(Product.objects.all()), len(list(Product.objects.all())) if len(list(Product.objects.all())) < 4 else 4)
+        relatedProducts = random.sample(list(Product.objects.all()), len(
+            list(Product.objects.all())) if len(list(Product.objects.all())) < 4 else 4)
         # print({product})
         # productSizes = ProductSize.objects.filter()
         if product:
@@ -47,22 +48,23 @@ def catalogDetail(request, id):
                 'product': {
                     'id': product.id,
                     'name': product.name,
-                    'article' : product.article,
-                    'sizes': [size.size for size in ProductSize.objects.filter(prodSize = product)],
+                    'article': product.article,
+                    'sizes': [size.size for size in ProductSize.objects.filter(prodSize=product)],
                     'price': product.final_price,
                     'discount': product.discount,
                     'description': product.description,
-                    'images': [image.images.url for image in ProductImage.objects.filter(product = product)],
+                    'images': [image.images.url for image in ProductImage.objects.filter(product=product)],
                 },
-                'relatedProducts': [{**{'name': relatedProduct.name,'preview': relatedProduct.preview, 'price' : relatedProduct.final_price, 'discount': relatedProduct.discount}, **{'images': [image.images.url for image in relatedProduct.images.all()], 'url': relatedProduct.get_absolute_url()}} for relatedProduct in relatedProducts]
-                
+                'relatedProducts': [{**{'name': relatedProduct.name, 'preview': relatedProduct.preview, 'price': relatedProduct.final_price, 'discount': relatedProduct.discount}, **{'images': [image.images.url for image in relatedProduct.images.all()], 'url': relatedProduct.get_absolute_url()}} for relatedProduct in relatedProducts]
+
                 # 'relatedProducts': [{relatedProduct} for relatedProduct in relatedProducts]
             }
             # print(serializers.serialize('json',relatedProducts, fields=('name','final_price','price','discount','preview', 'images'), use_natural_foreign_keys=True, indent=4))
             # print(ProductSerializer(instance=relatedProducts))
             # print([size.size for size in ProductSize.objects.filter(prodSize = product)])
             # print([[image.images.url for image in relatedProduct.images.all()] for relatedProduct in relatedProducts])
-            print([{**{'name': relatedProduct.name,'preview': relatedProduct.preview, 'price' : relatedProduct.final_price, 'discount': relatedProduct.discount}, **{'images': [image.images.url for image in relatedProduct.images.all()]}} for relatedProduct in relatedProducts])
+            print([{**{'name': relatedProduct.name, 'preview': relatedProduct.preview, 'price': relatedProduct.final_price, 'discount': relatedProduct.discount},
+                  **{'images': [image.images.url for image in relatedProduct.images.all()]}} for relatedProduct in relatedProducts])
             return JsonResponse(context)
         else:
             raise Http404("Product does not exist")
@@ -76,7 +78,7 @@ def addToCart(request):
         productId = request.GET.get('productId')
         size = request.GET.get('size')
         if 'productsCart' in request.session:
-            product = Product.objects.get(pk = int(productId))
+            product = Product.objects.get(pk=int(productId))
             deliveryOptions = Delivery.objects.all()
             cartHasItem = False
             # print(request.session['productsCart'])
@@ -102,7 +104,7 @@ def addToCart(request):
                 request.session['productsCart'].append(productResponse)
                 request.session.modified = True
         else:
-            product = Product.objects.get(pk = int(productId))
+            product = Product.objects.get(pk=int(productId))
             deliveryOptions = Delivery.objects.all()
             productResponse = {
                 'id': product.id,
@@ -124,13 +126,10 @@ def addToCart(request):
             request.session.modified = True
             request.session['deliveryOptions'] = [deliveryChoises]
             request.session.modified = True
-        
-        
-        return JsonResponse({'productsCart': request.session['productsCart'], 'deliveryOptions':request.session['deliveryOptions']})
+
+        return JsonResponse({'productsCart': request.session['productsCart'], 'deliveryOptions': request.session['deliveryOptions']})
     else:
         return HttpResponseBadRequest()
-    
-
 
 
 def contacts(request):
@@ -145,6 +144,7 @@ def getCartProducts(request):
         return JsonResponse({'productsCart': request.session['productsCart'], 'deliveryOptions': request.session['deliveryOptions']})
     else:
         raise Http404()
+
 
 def changeCartItemQty(request):
     if request.is_ajax:
@@ -166,7 +166,7 @@ def deleteFromCart(request):
     if request.is_ajax:
         # print(json.load(request))
         requestData = json.load(request)
-        
+
         for index, product in enumerate(request.session['productsCart'], start=0):
             # print(product['id'])
             # print(productId)
